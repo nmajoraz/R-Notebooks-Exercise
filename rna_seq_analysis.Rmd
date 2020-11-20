@@ -1,12 +1,21 @@
 ---
 title: "rna_seq_analysis"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
 ---
+
+Introduction
+============
+We're comparing the expression levels of all genes in two conditions, Ish and T47D.
+We have 5 replicates for each condition
 
 Data Preparation
 ================
 Load any necessary libraries.
-```{r "libraries", warning = FALSE}
+```{r "libraries", warning = FALSE, message = FALSE}
 library(tidyverse)
 library(ggrepel)
 ```
