@@ -5,7 +5,7 @@ output: html_notebook
 
 Data Preparation
 ================
-```{r message = FALSE}
+```{r "data prep", message = FALSE}
 library(tidyverse)
 
 mouse = read_tsv(file = "rnaseq_counts.txt", col_types = cols(Chromosome = col_character()))
@@ -20,13 +20,27 @@ mouse %>%
   mutate(Sample = paste(Condition, Replicate, sep = "_")) %>% 
   relocate(Sample, .after = Probe) %>% 
   group_by(Probe) %>% 
-  filter(sum(Counts) > 0) -> mouse.counts
-
+  filter(sum(Counts) > 0) %>% 
+  ungroup() -> mouse.counts
 ```
 
 
 Data Normalization and Summarization
 ====================================
+```{r "violin plots"}
+mouse.counts %>% 
+  mutate(Counts_Norm = (log2(1 + Counts))/1000000) -> mouse.counts
+
+mouse.counts %>% 
+  ggplot(aes(x = Sample, y = Counts_Norm, color = Condition)) + geom_violin()
+```
+```{r "data restructure"}
+mouse.counts %>% 
+  group_by(Probe, Condition) %>% 
+  summarize(meanLog2rpm = mean(Counts_Norm)) %>% 
+  pivot_wider(names_from = Condition, values_from = meanLog2rpm) -> summarized.counts
+```
+
 
 Plotting and Analysis
 =====================
