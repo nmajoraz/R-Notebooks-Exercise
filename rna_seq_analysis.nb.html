@@ -1760,22 +1760,51 @@ summary {
 <!-- rnb-text-begin -->
 <div id="data-preparation" class="section level1">
 <h1>Data Preparation</h1>
+<p>Load any necessary libraries.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5cbm1vdXNlID0gcmVhZF90c3YoZmlsZSA9IFwicm5hc2VxX2NvdW50cy50eHRcIiwgY29sX3R5cGVzID0gY29scyhDaHJvbW9zb21lID0gY29sX2NoYXJhY3RlcigpKSlcblxubW91c2UgJT4lIFxuICBzZWxlY3QoUHJvYmUsIENocm9tb3NvbWU6RGlzdGFuY2UpIC0+IG1vdXNlLmFubm90XG5cbm1vdXNlICU+JSBcbiAgc2VsZWN0KFByb2JlLCBJc2hfMTpUNDdEXzEpICU+JSBcbiAgcGl2b3RfbG9uZ2VyKGNvbHMgPSBJc2hfMTpUNDdEXzEsIG5hbWVzX3RvID0gYyhcIkNvbmRpdGlvblwiLCBcIlJlcGxpY2F0ZVwiKSwgbmFtZXNfc2VwID0gXCJfXCIsXG4gICAgICAgICAgICAgICB2YWx1ZXNfdG8gPSBcIkNvdW50c1wiKSAlPiUgXG4gIG11dGF0ZShTYW1wbGUgPSBwYXN0ZShDb25kaXRpb24sIFJlcGxpY2F0ZSwgc2VwID0gXCJfXCIpKSAlPiUgXG4gIHJlbG9jYXRlKFNhbXBsZSwgLmFmdGVyID0gUHJvYmUpICU+JSBcbiAgZ3JvdXBfYnkoUHJvYmUpICU+JSBcbiAgZmlsdGVyKHN1bShDb3VudHMpID4gMCkgJT4lIFxuICB1bmdyb3VwKCkgLT4gbW91c2UuY291bnRzXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KGdncmVwZWwpXG5gYGAifQ== -->
 <pre class="r"><code>library(tidyverse)
-
-mouse = read_tsv(file = &quot;rnaseq_counts.txt&quot;, col_types = cols(Chromosome = col_character()))
-
-mouse %&gt;% 
-  select(Probe, Chromosome:Distance) -&gt; mouse.annot
-
-mouse %&gt;% 
+library(ggrepel)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Load required datasets.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UgPSByZWFkX3RzdihmaWxlID0gXCJybmFzZXFfY291bnRzLnR4dFwiLCBjb2xfdHlwZXMgPSBjb2xzKENocm9tb3NvbWUgPSBjb2xfY2hhcmFjdGVyKCkpKVxuaGVhZChtb3VzZSlcbmBgYCJ9 -->
+<pre class="r"><code>mouse = read_tsv(file = &quot;rnaseq_counts.txt&quot;, col_types = cols(Chromosome = col_character()))
+head(mouse)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Restructuring datasets. Split apart the annotation and the data.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UgJT4lIFxuICBzZWxlY3QoUHJvYmU6RGlzdGFuY2UpIC0+IG1vdXNlLmFubm90XG5gYGAifQ== -->
+<pre class="r"><code>mouse %&gt;% 
+  select(Probe:Distance) -&gt; mouse.annot</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UgJT4lIFxuICBzZWxlY3QoUHJvYmUsIElzaF8xOlQ0N0RfMSkgJT4lIFxuICBwaXZvdF9sb25nZXIoY29scyA9IElzaF8xOlQ0N0RfMSwgbmFtZXNfdG8gPSBjKFwiQ29uZGl0aW9uXCIsIFwiUmVwbGljYXRlXCIpLCBcbiAgICAgICAgICAgICAgIG5hbWVzX3NlcCA9IFwiX1wiLCB2YWx1ZXNfdG8gPSBcIkNvdW50c1wiKSAlPiUgXG4gIG11dGF0ZShTYW1wbGUgPSBwYXN0ZShDb25kaXRpb24sIFJlcGxpY2F0ZSwgc2VwID0gXCJfXCIpKSAlPiUgXG4gIHJlbG9jYXRlKFNhbXBsZSwgLmFmdGVyID0gUHJvYmUpIC0+IG1vdXNlLmNvdW50c1xuaGVhZChtb3VzZS5jb3VudHMpXG5gYGAifQ== -->
+<pre class="r"><code>mouse %&gt;% 
   select(Probe, Ish_1:T47D_1) %&gt;% 
-  pivot_longer(cols = Ish_1:T47D_1, names_to = c(&quot;Condition&quot;, &quot;Replicate&quot;), names_sep = &quot;_&quot;,
-               values_to = &quot;Counts&quot;) %&gt;% 
+  pivot_longer(cols = Ish_1:T47D_1, names_to = c(&quot;Condition&quot;, &quot;Replicate&quot;), 
+               names_sep = &quot;_&quot;, values_to = &quot;Counts&quot;) %&gt;% 
   mutate(Sample = paste(Condition, Replicate, sep = &quot;_&quot;)) %&gt;% 
-  relocate(Sample, .after = Probe) %&gt;% 
+  relocate(Sample, .after = Probe) -&gt; mouse.counts
+head(mouse.counts)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Removing any genes that are unmeasured in all samples.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgZ3JvdXBfYnkoUHJvYmUpICU+JSBcbiAgZmlsdGVyKHN1bShDb3VudHMpID4gMCkgJT4lIFxuICB1bmdyb3VwKCkgLT4gbW91c2UuY291bnRzXG5gYGAifQ== -->
+<pre class="r"><code>mouse.counts %&gt;% 
   group_by(Probe) %&gt;% 
   filter(sum(Counts) &gt; 0) %&gt;% 
   ungroup() -&gt; mouse.counts</code></pre>
@@ -1785,22 +1814,41 @@ mouse %&gt;%
 </div>
 <div id="data-normalization-and-summarization" class="section level1">
 <h1>Data Normalization and Summarization</h1>
+<p>Changings the counts to log2RPM (reads per million reads of library)</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgbXV0YXRlKENvdW50c19Ob3JtID0gKGxvZzIoMSArIENvdW50cykpLzEwMDAwMDApIC0+IG1vdXNlLmNvdW50c1xuXG5tb3VzZS5jb3VudHMgJT4lIFxuICBnZ3Bsb3QoYWVzKHggPSBTYW1wbGUsIHkgPSBDb3VudHNfTm9ybSwgY29sb3IgPSBDb25kaXRpb24pKSArIGdlb21fdmlvbGluKClcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgZ3JvdXBfYnkoU2FtcGxlKSAlPiUgXG4gIG11dGF0ZShsb2cyUlBNID0gbG9nMigoMSArIENvdW50cykvKHN1bShDb3VudHMpLzEwMDAwMDApKSkgJT4lIFxuICB1bmdyb3VwKCkgLT4gbW91c2UuY291bnRzXG5cbmhlYWQobW91c2UuY291bnRzKVxuYGBgIn0= -->
 <pre class="r"><code>mouse.counts %&gt;% 
-  mutate(Counts_Norm = (log2(1 + Counts))/1000000) -&gt; mouse.counts
+  group_by(Sample) %&gt;% 
+  mutate(log2RPM = log2((1 + Counts)/(sum(Counts)/1000000))) %&gt;% 
+  ungroup() -&gt; mouse.counts
 
-mouse.counts %&gt;% 
-  ggplot(aes(x = Sample, y = Counts_Norm, color = Condition)) + geom_violin()</code></pre>
+head(mouse.counts)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Checking to ensure normalization.</p>
+<!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgZ3JvdXBfYnkoUHJvYmUsIENvbmRpdGlvbikgJT4lIFxuICBzdW1tYXJpemUobWVhbkxvZzJycG0gPSBtZWFuKENvdW50c19Ob3JtKSkgJT4lIFxuICBwaXZvdF93aWRlcihuYW1lc19mcm9tID0gQ29uZGl0aW9uLCB2YWx1ZXNfZnJvbSA9IG1lYW5Mb2cycnBtKSAtPiBzdW1tYXJpemVkLmNvdW50c1xuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgZ2dwbG90KGFlcyh4ID0gU2FtcGxlLCB5ID0gbG9nMlJQTSwgZmlsbCA9IENvbmRpdGlvbikpICsgXG4gICAgZ2VvbV92aW9saW4oKSArIFxuICAgIHNjYWxlX2ZpbGxfYnJld2VyKHBhbGV0dGUgPSBcIlNldDFcIilcbmBgYCJ9 -->
+<pre class="r"><code>mouse.counts %&gt;% 
+  ggplot(aes(x = Sample, y = log2RPM, fill = Condition)) + 
+    geom_violin() + 
+    scale_fill_brewer(palette = &quot;Set1&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Collapsing replicates by calculating average log2rpm for each condition.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW91c2UuY291bnRzICU+JSBcbiAgZ3JvdXBfYnkoUHJvYmUsIENvbmRpdGlvbikgJT4lIFxuICBzdW1tYXJpemUobWVhbkxvZzJycG0gPSBtZWFuKGxvZzJSUE0pKSAlPiUgXG4gIHVuZ3JvdXAoKSAlPiUgXG4gIHBpdm90X3dpZGVyKG5hbWVzX2Zyb20gPSBDb25kaXRpb24sIHZhbHVlc19mcm9tID0gbWVhbkxvZzJycG0pIC0+IHN1bW1hcml6ZWQuY291bnRzXG4gIFxuaGVhZChzdW1tYXJpemVkLmNvdW50cylcbmBgYCJ9 -->
 <pre class="r"><code>mouse.counts %&gt;% 
   group_by(Probe, Condition) %&gt;% 
-  summarize(meanLog2rpm = mean(Counts_Norm)) %&gt;% 
-  pivot_wider(names_from = Condition, values_from = meanLog2rpm) -&gt; summarized.counts</code></pre>
+  summarize(meanLog2rpm = mean(log2RPM)) %&gt;% 
+  ungroup() %&gt;% 
+  pivot_wider(names_from = Condition, values_from = meanLog2rpm) -&gt; summarized.counts
+  
+head(summarized.counts)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1808,9 +1856,66 @@ mouse.counts %&gt;%
 <div id="plotting-and-analysis" class="section level1">
 <h1>Plotting and Analysis</h1>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyaXplZC5jb3VudHMgJT4lIFxuICBnZ3Bsb3QoYWVzKHggPSBJc2gsIHkgPSBUNDdEKSkgKyBcbiAgICBnZW9tX3BvaW50KHNpemUgPSAwLjMpXG5gYGAifQ== -->
+<pre class="r"><code>summarized.counts %&gt;% 
+  ggplot(aes(x = Ish, y = T47D)) + 
+    geom_point(size = 0.3)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Determining the 50 genes with the highest absolute difference between Ish and T47D.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyaXplZC5jb3VudHMgJT4lIFxuICBtdXRhdGUoRGlmZiA9IElzaCAtIFQ0N0QpIC0+IHN1bW1hcml6ZWQuY291bnRzXG5cbnN1bW1hcml6ZWQuY291bnRzICU+JSBcbiAgYXJyYW5nZShkZXNjKGFicyhEaWZmKSkpICU+JSBcbiAgc2xpY2UoMTo1MClcbmBgYCJ9 -->
+<pre class="r"><code>summarized.counts %&gt;% 
+  mutate(Diff = Ish - T47D) -&gt; summarized.counts
+
+summarized.counts %&gt;% 
+  arrange(desc(abs(Diff))) %&gt;% 
+  slice(1:50)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Apparently GAGE genes are regulated together so let’s check out their plot.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyaXplZC5jb3VudHMgJT4lIFxuICBmaWx0ZXIoc3RhcnRzV2l0aChQcm9iZSwgXCJHQUdFXCIpKSAtPiBnYWdlLmdlbmVzXG5cbmdhZ2UuZ2VuZXNcbmBgYCJ9 -->
+<pre class="r"><code>summarized.counts %&gt;% 
+  filter(startsWith(Probe, &quot;GAGE&quot;)) -&gt; gage.genes
+
+gage.genes</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyaXplZC5jb3VudHMgJT4lIFxuICBtdXRhdGUoSXNHYWdlID0gc3RhcnRzV2l0aChQcm9iZSwgXCJHQUdFXCIpKSAlPiUgXG4gIGdncGxvdChhZXMoeCA9IElzaCwgeSA9IFQ0N0QsIGNvbG9yID0gSXNHYWdlKSkgKyBcbiAgICBnZW9tX3BvaW50KHNpemUgPSAwLjMsIHNob3cubGVnZW5kID0gRkFMU0UpICsgXG4gICAgc2NhbGVfY29sb3JfbWFudWFsKHZhbHVlcyA9IGMoXCJncmF5XCIsIFwicmVkMlwiKSkgKyBcbiAgICB0aGVtZV9idygpXG5gYGAifQ== -->
+<pre class="r"><code>summarized.counts %&gt;% 
+  mutate(IsGage = startsWith(Probe, &quot;GAGE&quot;)) %&gt;% 
+  ggplot(aes(x = Ish, y = T47D, color = IsGage)) + 
+    geom_point(size = 0.3, show.legend = FALSE) + 
+    scale_color_manual(values = c(&quot;gray&quot;, &quot;red2&quot;)) + 
+    theme_bw()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyaXplZC5jb3VudHMgJT4lIFxuICBnZ3Bsb3QoYWVzKHggPSBJc2gsIHkgPSBUNDdELCBsYWJlbCA9IFByb2JlKSkgKyBcbiAgICBnZW9tX3BvaW50KHNpemUgPSAwLjMsIHNob3cubGVnZW5kID0gRkFMU0UsIGNvbG9yID0gXCJncmF5XCIpICsgXG4gICAgZ2VvbV9wb2ludChkYXRhID0gZ2FnZS5nZW5lcywgc2l6ZSA9IDIsIHNob3cubGVnZW5kID0gRkFMU0UsIGNvbG9yID0gXCJyZWQyXCIpICsgXG4gICAgZ2VvbV90ZXh0X3JlcGVsKGRhdGEgPSBnYWdlLmdlbmVzLCBjb2xvciA9IFwiYmxhY2tcIikgKyBcbiAgICB0aGVtZV9idygpXG5gYGAifQ== -->
+<pre class="r"><code>summarized.counts %&gt;% 
+  ggplot(aes(x = Ish, y = T47D, label = Probe)) + 
+    geom_point(size = 0.3, show.legend = FALSE, color = &quot;gray&quot;) + 
+    geom_point(data = gage.genes, size = 2, show.legend = FALSE, color = &quot;red2&quot;) + 
+    geom_text_repel(data = gage.genes, color = &quot;black&quot;) + 
+    theme_bw()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogInJuYV9zZXFfYW5hbHlzaXMiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpEYXRhIFByZXBhcmF0aW9uDQo9PT09PT09PT09PT09PT09DQpgYGB7ciAiZGF0YSBwcmVwIiwgbWVzc2FnZSA9IEZBTFNFfQ0KbGlicmFyeSh0aWR5dmVyc2UpDQoNCm1vdXNlID0gcmVhZF90c3YoZmlsZSA9ICJybmFzZXFfY291bnRzLnR4dCIsIGNvbF90eXBlcyA9IGNvbHMoQ2hyb21vc29tZSA9IGNvbF9jaGFyYWN0ZXIoKSkpDQoNCm1vdXNlICU+JSANCiAgc2VsZWN0KFByb2JlLCBDaHJvbW9zb21lOkRpc3RhbmNlKSAtPiBtb3VzZS5hbm5vdA0KDQptb3VzZSAlPiUgDQogIHNlbGVjdChQcm9iZSwgSXNoXzE6VDQ3RF8xKSAlPiUgDQogIHBpdm90X2xvbmdlcihjb2xzID0gSXNoXzE6VDQ3RF8xLCBuYW1lc190byA9IGMoIkNvbmRpdGlvbiIsICJSZXBsaWNhdGUiKSwgbmFtZXNfc2VwID0gIl8iLA0KICAgICAgICAgICAgICAgdmFsdWVzX3RvID0gIkNvdW50cyIpICU+JSANCiAgbXV0YXRlKFNhbXBsZSA9IHBhc3RlKENvbmRpdGlvbiwgUmVwbGljYXRlLCBzZXAgPSAiXyIpKSAlPiUgDQogIHJlbG9jYXRlKFNhbXBsZSwgLmFmdGVyID0gUHJvYmUpICU+JSANCiAgZ3JvdXBfYnkoUHJvYmUpICU+JSANCiAgZmlsdGVyKHN1bShDb3VudHMpID4gMCkgJT4lIA0KICB1bmdyb3VwKCkgLT4gbW91c2UuY291bnRzDQpgYGANCg0KDQpEYXRhIE5vcm1hbGl6YXRpb24gYW5kIFN1bW1hcml6YXRpb24NCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQ0KYGBge3IgInZpb2xpbiBwbG90cyJ9DQptb3VzZS5jb3VudHMgJT4lIA0KICBtdXRhdGUoQ291bnRzX05vcm0gPSAobG9nMigxICsgQ291bnRzKSkvMTAwMDAwMCkgLT4gbW91c2UuY291bnRzDQoNCm1vdXNlLmNvdW50cyAlPiUgDQogIGdncGxvdChhZXMoeCA9IFNhbXBsZSwgeSA9IENvdW50c19Ob3JtLCBjb2xvciA9IENvbmRpdGlvbikpICsgZ2VvbV92aW9saW4oKQ0KYGBgDQpgYGB7ciAiZGF0YSByZXN0cnVjdHVyZSJ9DQptb3VzZS5jb3VudHMgJT4lIA0KICBncm91cF9ieShQcm9iZSwgQ29uZGl0aW9uKSAlPiUgDQogIHN1bW1hcml6ZShtZWFuTG9nMnJwbSA9IG1lYW4oQ291bnRzX05vcm0pKSAlPiUgDQogIHBpdm90X3dpZGVyKG5hbWVzX2Zyb20gPSBDb25kaXRpb24sIHZhbHVlc19mcm9tID0gbWVhbkxvZzJycG0pIC0+IHN1bW1hcml6ZWQuY291bnRzDQpgYGANCg0KDQpQbG90dGluZyBhbmQgQW5hbHlzaXMNCj09PT09PT09PT09PT09PT09PT09PQ0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogInJuYV9zZXFfYW5hbHlzaXMiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpEYXRhIFByZXBhcmF0aW9uDQo9PT09PT09PT09PT09PT09DQpMb2FkIGFueSBuZWNlc3NhcnkgbGlicmFyaWVzLg0KYGBge3IgImxpYnJhcmllcyIsIHdhcm5pbmcgPSBGQUxTRX0NCmxpYnJhcnkodGlkeXZlcnNlKQ0KbGlicmFyeShnZ3JlcGVsKQ0KYGBgDQoNCkxvYWQgcmVxdWlyZWQgZGF0YXNldHMuDQpgYGB7ciAiZGF0YSJ9DQptb3VzZSA9IHJlYWRfdHN2KGZpbGUgPSAicm5hc2VxX2NvdW50cy50eHQiLCBjb2xfdHlwZXMgPSBjb2xzKENocm9tb3NvbWUgPSBjb2xfY2hhcmFjdGVyKCkpKQ0KaGVhZChtb3VzZSkNCmBgYA0KUmVzdHJ1Y3R1cmluZyBkYXRhc2V0cy4gU3BsaXQgYXBhcnQgdGhlIGFubm90YXRpb24gYW5kIHRoZSBkYXRhLg0KYGBge3IgImFubm90YXRpb24gc3BsaXQifQ0KbW91c2UgJT4lIA0KICBzZWxlY3QoUHJvYmU6RGlzdGFuY2UpIC0+IG1vdXNlLmFubm90DQpgYGANCg0KDQpgYGB7ciAiZGF0YSBzcGxpdCIsIG1lc3NhZ2UgPSBGQUxTRX0NCm1vdXNlICU+JSANCiAgc2VsZWN0KFByb2JlLCBJc2hfMTpUNDdEXzEpICU+JSANCiAgcGl2b3RfbG9uZ2VyKGNvbHMgPSBJc2hfMTpUNDdEXzEsIG5hbWVzX3RvID0gYygiQ29uZGl0aW9uIiwgIlJlcGxpY2F0ZSIpLCANCiAgICAgICAgICAgICAgIG5hbWVzX3NlcCA9ICJfIiwgdmFsdWVzX3RvID0gIkNvdW50cyIpICU+JSANCiAgbXV0YXRlKFNhbXBsZSA9IHBhc3RlKENvbmRpdGlvbiwgUmVwbGljYXRlLCBzZXAgPSAiXyIpKSAlPiUgDQogIHJlbG9jYXRlKFNhbXBsZSwgLmFmdGVyID0gUHJvYmUpIC0+IG1vdXNlLmNvdW50cw0KaGVhZChtb3VzZS5jb3VudHMpDQpgYGANClJlbW92aW5nIGFueSBnZW5lcyB0aGF0IGFyZSB1bm1lYXN1cmVkIGluIGFsbCBzYW1wbGVzLg0KYGBge3IgImdlbmUgcmVtb3ZhbCJ9DQptb3VzZS5jb3VudHMgJT4lIA0KICBncm91cF9ieShQcm9iZSkgJT4lIA0KICBmaWx0ZXIoc3VtKENvdW50cykgPiAwKSAlPiUgDQogIHVuZ3JvdXAoKSAtPiBtb3VzZS5jb3VudHMNCmBgYA0KDQoNCkRhdGEgTm9ybWFsaXphdGlvbiBhbmQgU3VtbWFyaXphdGlvbg0KPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQpDaGFuZ2luZ3MgdGhlIGNvdW50cyB0byBsb2cyUlBNIChyZWFkcyBwZXIgbWlsbGlvbiByZWFkcyBvZiBsaWJyYXJ5KQ0KYGBge3IgImNhbGN1bGF0ZSBsb2cyUlBNIn0NCm1vdXNlLmNvdW50cyAlPiUgDQogIGdyb3VwX2J5KFNhbXBsZSkgJT4lIA0KICBtdXRhdGUobG9nMlJQTSA9IGxvZzIoKDEgKyBDb3VudHMpLyhzdW0oQ291bnRzKS8xMDAwMDAwKSkpICU+JSANCiAgdW5ncm91cCgpIC0+IG1vdXNlLmNvdW50cw0KDQpoZWFkKG1vdXNlLmNvdW50cykNCmBgYA0KDQpDaGVja2luZyB0byBlbnN1cmUgbm9ybWFsaXphdGlvbi4NCmBgYHtyICJ2aW9saW4gcGxvdHMifQ0KbW91c2UuY291bnRzICU+JSANCiAgZ2dwbG90KGFlcyh4ID0gU2FtcGxlLCB5ID0gbG9nMlJQTSwgZmlsbCA9IENvbmRpdGlvbikpICsgDQogICAgZ2VvbV92aW9saW4oKSArIA0KICAgIHNjYWxlX2ZpbGxfYnJld2VyKHBhbGV0dGUgPSAiU2V0MSIpDQpgYGANCg0KQ29sbGFwc2luZyByZXBsaWNhdGVzIGJ5IGNhbGN1bGF0aW5nIGF2ZXJhZ2UgbG9nMnJwbSBmb3IgZWFjaCBjb25kaXRpb24uIA0KYGBge3IgImRhdGEgcmVzdHJ1Y3R1cmUiLCBtZXNzYWdlID0gRkFMU0V9DQptb3VzZS5jb3VudHMgJT4lIA0KICBncm91cF9ieShQcm9iZSwgQ29uZGl0aW9uKSAlPiUgDQogIHN1bW1hcml6ZShtZWFuTG9nMnJwbSA9IG1lYW4obG9nMlJQTSkpICU+JSANCiAgdW5ncm91cCgpICU+JSANCiAgcGl2b3Rfd2lkZXIobmFtZXNfZnJvbSA9IENvbmRpdGlvbiwgdmFsdWVzX2Zyb20gPSBtZWFuTG9nMnJwbSkgLT4gc3VtbWFyaXplZC5jb3VudHMNCiAgDQpoZWFkKHN1bW1hcml6ZWQuY291bnRzKQ0KYGBgDQoNClBsb3R0aW5nIGFuZCBBbmFseXNpcw0KPT09PT09PT09PT09PT09PT09PT09DQoNCmBgYHtyICJzY2F0dGVycGxvdCIsIGZpZy53aWR0aCA9IDcsIGZpZy5oZWlnaHQgPSA3fQ0Kc3VtbWFyaXplZC5jb3VudHMgJT4lIA0KICBnZ3Bsb3QoYWVzKHggPSBJc2gsIHkgPSBUNDdEKSkgKyANCiAgICBnZW9tX3BvaW50KHNpemUgPSAwLjMpDQpgYGANCg0KRGV0ZXJtaW5pbmcgdGhlIDUwIGdlbmVzIHdpdGggdGhlIGhpZ2hlc3QgYWJzb2x1dGUgZGlmZmVyZW5jZSBiZXR3ZWVuIElzaCBhbmQgVDQ3RC4NCmBgYHtyICJ0YWJsZSIsIHdhcm5pbmcgPSBGQUxTRX0NCnN1bW1hcml6ZWQuY291bnRzICU+JSANCiAgbXV0YXRlKERpZmYgPSBJc2ggLSBUNDdEKSAtPiBzdW1tYXJpemVkLmNvdW50cw0KDQpzdW1tYXJpemVkLmNvdW50cyAlPiUgDQogIGFycmFuZ2UoZGVzYyhhYnMoRGlmZikpKSAlPiUgDQogIHNsaWNlKDE6NTApDQpgYGANCg0KQXBwYXJlbnRseSBHQUdFIGdlbmVzIGFyZSByZWd1bGF0ZWQgdG9nZXRoZXIgc28gbGV0J3MgY2hlY2sgb3V0IHRoZWlyIHBsb3QuDQpgYGB7ciAiR0FHRSB0YWJsZSJ9DQpzdW1tYXJpemVkLmNvdW50cyAlPiUgDQogIGZpbHRlcihzdGFydHNXaXRoKFByb2JlLCAiR0FHRSIpKSAtPiBnYWdlLmdlbmVzDQoNCmdhZ2UuZ2VuZXMNCmBgYA0KDQpgYGB7ciAiR0FHRSBzY2F0dGVycGxvdCAxIiwgZmlnLndpZHRoID0gNywgZmlnLmhlaWdodCA9IDd9DQpzdW1tYXJpemVkLmNvdW50cyAlPiUgDQogIG11dGF0ZShJc0dhZ2UgPSBzdGFydHNXaXRoKFByb2JlLCAiR0FHRSIpKSAlPiUgDQogIGdncGxvdChhZXMoeCA9IElzaCwgeSA9IFQ0N0QsIGNvbG9yID0gSXNHYWdlKSkgKyANCiAgICBnZW9tX3BvaW50KHNpemUgPSAwLjMsIHNob3cubGVnZW5kID0gRkFMU0UpICsgDQogICAgc2NhbGVfY29sb3JfbWFudWFsKHZhbHVlcyA9IGMoImdyYXkiLCAicmVkMiIpKSArIA0KICAgIHRoZW1lX2J3KCkNCmBgYA0KDQpgYGB7ciAiR0FHRSBzY2F0dGVycGxvdCAyIiwgZmlnLndpZHRoID0gNywgZmlnLmhlaWdodCA9IDd9DQpzdW1tYXJpemVkLmNvdW50cyAlPiUgDQogIGdncGxvdChhZXMoeCA9IElzaCwgeSA9IFQ0N0QsIGxhYmVsID0gUHJvYmUpKSArIA0KICAgIGdlb21fcG9pbnQoc2l6ZSA9IDAuMywgc2hvdy5sZWdlbmQgPSBGQUxTRSwgY29sb3IgPSAiZ3JheSIpICsgDQogICAgZ2VvbV9wb2ludChkYXRhID0gZ2FnZS5nZW5lcywgc2l6ZSA9IDIsIHNob3cubGVnZW5kID0gRkFMU0UsIGNvbG9yID0gInJlZDIiKSArIA0KICAgIGdlb21fdGV4dF9yZXBlbChkYXRhID0gZ2FnZS5nZW5lcywgY29sb3IgPSAiYmxhY2siKSArIA0KICAgIHRoZW1lX2J3KCkNCmBgYA0KDQo=</div>
 
 
 

@@ -5,20 +5,36 @@ output: html_notebook
 
 Data Preparation
 ================
-```{r "data prep", message = FALSE}
+Load any necessary libraries.
+```{r "libraries", warning = FALSE}
 library(tidyverse)
+library(ggrepel)
+```
 
+Load required datasets.
+```{r "data"}
 mouse = read_tsv(file = "rnaseq_counts.txt", col_types = cols(Chromosome = col_character()))
-
+head(mouse)
+```
+Restructuring datasets. Split apart the annotation and the data.
+```{r "annotation split"}
 mouse %>% 
-  select(Probe, Chromosome:Distance) -> mouse.annot
+  select(Probe:Distance) -> mouse.annot
+```
 
+
+```{r "data split", message = FALSE}
 mouse %>% 
   select(Probe, Ish_1:T47D_1) %>% 
-  pivot_longer(cols = Ish_1:T47D_1, names_to = c("Condition", "Replicate"), names_sep = "_",
-               values_to = "Counts") %>% 
+  pivot_longer(cols = Ish_1:T47D_1, names_to = c("Condition", "Replicate"), 
+               names_sep = "_", values_to = "Counts") %>% 
   mutate(Sample = paste(Condition, Replicate, sep = "_")) %>% 
-  relocate(Sample, .after = Probe) %>% 
+  relocate(Sample, .after = Probe) -> mouse.counts
+head(mouse.counts)
+```
+Removing any genes that are unmeasured in all samples.
+```{r "gene removal"}
+mouse.counts %>% 
   group_by(Probe) %>% 
   filter(sum(Counts) > 0) %>% 
   ungroup() -> mouse.counts
@@ -27,20 +43,77 @@ mouse %>%
 
 Data Normalization and Summarization
 ====================================
+Changings the counts to log2RPM (reads per million reads of library)
+```{r "calculate log2RPM"}
+mouse.counts %>% 
+  group_by(Sample) %>% 
+  mutate(log2RPM = log2((1 + Counts)/(sum(Counts)/1000000))) %>% 
+  ungroup() -> mouse.counts
+
+head(mouse.counts)
+```
+
+Checking to ensure normalization.
 ```{r "violin plots"}
 mouse.counts %>% 
-  mutate(Counts_Norm = (log2(1 + Counts))/1000000) -> mouse.counts
-
-mouse.counts %>% 
-  ggplot(aes(x = Sample, y = Counts_Norm, color = Condition)) + geom_violin()
+  ggplot(aes(x = Sample, y = log2RPM, fill = Condition)) + 
+    geom_violin() + 
+    scale_fill_brewer(palette = "Set1")
 ```
-```{r "data restructure"}
+
+Collapsing replicates by calculating average log2rpm for each condition. 
+```{r "data restructure", message = FALSE}
 mouse.counts %>% 
   group_by(Probe, Condition) %>% 
-  summarize(meanLog2rpm = mean(Counts_Norm)) %>% 
+  summarize(meanLog2rpm = mean(log2RPM)) %>% 
+  ungroup() %>% 
   pivot_wider(names_from = Condition, values_from = meanLog2rpm) -> summarized.counts
+  
+head(summarized.counts)
 ```
-
 
 Plotting and Analysis
 =====================
+
+```{r "scatterplot", fig.width = 7, fig.height = 7}
+summarized.counts %>% 
+  ggplot(aes(x = Ish, y = T47D)) + 
+    geom_point(size = 0.3)
+```
+
+Determining the 50 genes with the highest absolute difference between Ish and T47D.
+```{r "table", warning = FALSE}
+summarized.counts %>% 
+  mutate(Diff = Ish - T47D) -> summarized.counts
+
+summarized.counts %>% 
+  arrange(desc(abs(Diff))) %>% 
+  slice(1:50)
+```
+
+Apparently GAGE genes are regulated together so let's check out their plot.
+```{r "GAGE table"}
+summarized.counts %>% 
+  filter(startsWith(Probe, "GAGE")) -> gage.genes
+
+gage.genes
+```
+
+```{r "GAGE scatterplot 1", fig.width = 7, fig.height = 7}
+summarized.counts %>% 
+  mutate(IsGage = startsWith(Probe, "GAGE")) %>% 
+  ggplot(aes(x = Ish, y = T47D, color = IsGage)) + 
+    geom_point(size = 0.3, show.legend = FALSE) + 
+    scale_color_manual(values = c("gray", "red2")) + 
+    theme_bw()
+```
+
+```{r "GAGE scatterplot 2", fig.width = 7, fig.height = 7}
+summarized.counts %>% 
+  ggplot(aes(x = Ish, y = T47D, label = Probe)) + 
+    geom_point(size = 0.3, show.legend = FALSE, color = "gray") + 
+    geom_point(data = gage.genes, size = 2, show.legend = FALSE, color = "red2") + 
+    geom_text_repel(data = gage.genes, color = "black") + 
+    theme_bw()
+```
+
